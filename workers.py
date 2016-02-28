@@ -5,13 +5,14 @@ import select
 
 import signal
 import traceback
+import BaseHTTPServer
 
 from HTTPRequestParser import *
 workers = []
 
 def handle(connection):
     request = connection.recv(1024)
-    response = getResponse(request)
+    response = parseRequest(request)
     connection.sendall(response)
 
 class Worker:
