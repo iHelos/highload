@@ -5,11 +5,14 @@ import select
 
 import signal
 import traceback
+
+from HTTPRequestParser import *
 workers = []
 
-def handle(sock):
-    #####
-    return True
+def handle(connection):
+    request = connection.recv(1024)
+    response = getResponse(request)
+    connection.sendall(response)
 
 class Worker:
     def __init__(self, pid, pipe):
