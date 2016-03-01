@@ -9,9 +9,9 @@ from HTTPRequestParser import *
 workers = []
 
 
-def handle(connection):
+def handle(connection, dir):
     request = connection.recv(1024)
-    header, body = parseRequest(request, os.path.dirname(__file__))
+    header, body = parseRequest(request, dir)
     connection.sendall(header)
     # connection.sendall(body)
     if body is not None:
@@ -30,7 +30,7 @@ class Worker:
         self.pipe = pipe
 
 
-def createWorker(request_socket):
+def createWorker(request_socket, dir):
     worker_pipe, parent_pipe = socket.socketpair()
     pid = os.fork()
     # -----------------------------> Воркер
@@ -43,7 +43,7 @@ def createWorker(request_socket):
                 command = parent_pipe.recv(1)
                 connection, (client_ip, client_port) = request_socket.accept()
                 print('starting working:')
-                handle(connection)
+                handle(connection, dir)
                 connection.close()
                 parent_pipe.send(b'F')
             except IOError as e:
@@ -54,9 +54,9 @@ def createWorker(request_socket):
     print(workers)
 
 
-def startServerUnsafety(listen_sock, count_workers):
+def startServerUnsafety(listen_sock, count_workers, dir):
     for i in range(count_workers):
-        createWorker(listen_sock)
+        createWorker(listen_sock, dir)
 
     to_read = [listen_sock.fileno()] + [c.pipe.fileno() for c in workers]
     while True:
@@ -75,9 +75,9 @@ def startServerUnsafety(listen_sock, count_workers):
                 worker.working = False
 
 
-def startServer(listen_sock, count_workers):
+def startServer(listen_sock, count_workers, dir):
     try:
-        startServerUnsafety(listen_sock, count_workers)
+        startServerUnsafety(listen_sock, count_workers, dir)
     except:
         traceback.print_exc()
         for w in workers:
