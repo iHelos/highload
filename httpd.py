@@ -13,12 +13,12 @@ workers = []
 def startParameters():
     parser = argparse.ArgumentParser(description="Technopark WebServer")
     parser.add_argument('-p', type=int, help='port to run server')
-    parser.add_argument('-w', type=int, help='number of workers')
+    parser.add_argument('-c', type=int, help='number of workers')
     parser.add_argument('-r', type=int, help='ROOTDIR')
 
     args = vars(parser.parse_args())
     port = args['p'] or PORT
-    cpus = args['w'] or WORKERS
+    cpus = args['c'] or WORKERS
     rootdir = args['r'] or ROOTDIR
     return port, cpus, rootdir
 
