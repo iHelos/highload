@@ -12,14 +12,16 @@ workers = []
 
 def handle(connection):
     request = connection.recv(1024)
-    header, body = parseRequest(request, os.path.dirname(__file__) + '/httptest')
+    header, body = parseRequest(request, os.path.dirname(__file__))
     connection.sendall(header)
     #connection.sendall(body)
-    body.seek(0)
-    l = body.read(4096)
-    while (l):
-        connection.send(l)
+    if body is not None:
+        body.seek(0)
         l = body.read(4096)
+        while (l):
+            connection.send(l)
+            l = body.read(4096)
+        body.close()
 
 class Worker:
     def __init__(self, pid, pipe):

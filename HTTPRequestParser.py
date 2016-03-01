@@ -1,6 +1,7 @@
 import time
 import os
 import StringIO
+import urllib
 import BaseHTTPServer
 
 types = {
@@ -14,10 +15,14 @@ types = {
     'png': 'image/png',
     'swf': 'application/x-shockwave-flash'
 }
+errors = {
+    405: 'Method not allowed',
+    404: 'Not Found',
+    403: 'Forbidden'
+}
 
-error_body = "<h1>404 Not Found</h1><br>Highload.Ermakov is as sad as you :("
 
-
+error_body = "<h1>Error</h1><br>Highload.Ermakov is as sad as you :("
 def parseRequest(request, root_dir):
     parsedLine = request.split('\n', 1)[0].split(' ')
     method, url = parsedLine[0], parsedLine[1]
@@ -25,23 +30,39 @@ def parseRequest(request, root_dir):
     http_version = 'HTTP/1.1'
     status = '200 OK'
     connection = 'keep-alive'
-    body = StringIO.StringIO()
-    body.write(error_body)
+    body = None
+    content_length = None
+    # body = StringIO.StringIO()
+    # body.write(error_body)
+    # content_length = len(error_body)
+    # content_type = 'text/html'
     if method not in ['GET', 'HEAD']:
-        status = '501 Not Implemented'
-        connection = 'closed'
+        body,status,connection,content_type,content_length = setError(405)
+        # status = '405 Not Implemented'
+        # connection = 'closed'
+        return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                               content_type, connection, body)
+
     path = url.split('?')[0]
+    path = urllib.unquote(path).decode('utf8')
+
+    if '..' in path:
+        body,status,connection,content_type,content_length = setError(404)
+        return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                               content_type, connection, body)
+    # path = path.replace('%20',' ')
     print(root_dir + path)
     filename = path.split('\\')[-1]
-    content_length = len(error_body)
     try:
-        type = filename.split('.')[1]
+        type = filename.split('.')[-1]
         try:
             content_type = types[type.lower()]
         except KeyError:
             content_type = 'application/octet-stream'
         print(path)
         if os.path.exists(root_dir + path):
+            if path[-1] == '/':
+                path+='index.html'
             if os.path.isfile(root_dir + path):
                 content_length = os.stat(root_dir + path).st_size
                 try:
@@ -49,14 +70,23 @@ def parseRequest(request, root_dir):
                 except:
                     pass
             else:
-                status = '404 Not Found'
-                content_type = 'text/html'
+                body,status,connection,content_type,content_length = setError(403)
+        # status = '405 Not Implemented'
+        # connection = 'closed'
+                return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                               content_type, connection, body)
         else:
-            status = '404 Not Found'
-            content_type = 'text/html'
+            body,status,connection,content_type,content_length = setError(404)
+        # status = '405 Not Implemented'
+        # connection = 'closed'
+            return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                               content_type, connection, body)
     except:
-        status = '404 Not Found'
-        content_type = 'text/html'
+        body,status,connection,content_type,content_length = setError(404)
+        # status = '405 Not Implemented'
+        # connection = 'closed'
+        return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                               content_type, connection, body)
 
     # print(path)
     if method == 'GET':
@@ -94,3 +124,11 @@ def date_time_string():
         day, monthname[month], year,
         hh, mm, ss)
     return s
+
+def setError(code):
+    body = StringIO.StringIO()
+    error_body = "<h1>" + str(code) + ' ' + errors[code] + "</h1><br>Highload.Ermakov is as sad as you :("
+    body.write(error_body)
+    return body, str(code) + ' ' + errors[code], 'closed', 'text/html', len(error_body)
+
+
