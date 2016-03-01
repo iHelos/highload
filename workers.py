@@ -2,7 +2,7 @@
 import os
 import socket
 import select
-
+import StringIO
 import signal
 import traceback
 import BaseHTTPServer
@@ -12,8 +12,14 @@ workers = []
 
 def handle(connection):
     request = connection.recv(1024)
-    response = parseRequest(request)
-    connection.sendall(response)
+    header, body = parseRequest(request, os.path.dirname(__file__) + '/httptest')
+    connection.sendall(header)
+    #connection.sendall(body)
+    body.seek(0)
+    l = body.read(4096)
+    while (l):
+        connection.send(l)
+        l = body.read(4096)
 
 class Worker:
     def __init__(self, pid, pipe):
@@ -33,7 +39,7 @@ def createWorker(request_socket):
             try:
                 print("waiting")
                 command = parent_pipe.recv(1)
-                connection, (client_ip, clinet_port) = request_socket.accept()
+                connection, (client_ip, client_port) = request_socket.accept()
                 print('starting working:')
                 handle(connection)
                 connection.close()

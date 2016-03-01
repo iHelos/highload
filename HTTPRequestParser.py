@@ -1,5 +1,7 @@
 import time
 import os
+import StringIO
+import BaseHTTPServer
 
 types = {
     'html': 'text/html',
@@ -13,6 +15,8 @@ types = {
     'swf': 'application/x-shockwave-flash'
 }
 
+error_body = "<h1>404 Not Found</h1><br>Highload.Ermakov is as sad as you :("
+
 
 def parseRequest(request, root_dir):
     parsedLine = request.split('\n', 1)[0].split(' ')
@@ -21,40 +25,61 @@ def parseRequest(request, root_dir):
     http_version = 'HTTP/1.1'
     status = '200 OK'
     connection = 'keep-alive'
-
+    body = StringIO.StringIO()
+    body.write(error_body)
     if method not in ['GET', 'HEAD']:
         status = '501 Not Implemented'
         connection = 'closed'
     path = url.split('?')[0]
+    print(root_dir + path)
     filename = path.split('\\')[-1]
-    type = filename.split('.')[1]
-    content_type = 'application/octet-stream'
+    content_length = len(error_body)
     try:
-        content_type = types[type.lower()]
-    except KeyError:
-        pass
-    file = open(path, 'rb')
-    content_length = os.stat(path).st_size
-    print(path)
+        type = filename.split('.')[1]
+        try:
+            content_type = types[type.lower()]
+        except KeyError:
+            content_type = 'application/octet-stream'
+        print(path)
+        if os.path.exists(root_dir + path):
+            if os.path.isfile(root_dir + path):
+                content_length = os.stat(root_dir + path).st_size
+                try:
+                    body = open(root_dir + path, 'rb')
+                except:
+                    pass
+            else:
+                status = '404 Not Found'
+                content_type = 'text/html'
+        else:
+            status = '404 Not Found'
+            content_type = 'text/html'
+    except:
+        status = '404 Not Found'
+        content_type = 'text/html'
 
-    response = getResponse(http_version, status, date_time_string(), '', content_type, connection, '')
-    print(response)
-    response = request
+    # print(path)
+    if method == 'GET':
+        response = getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                               content_type, connection, body)
+    else:
+        response = getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                               content_type, connection)
+    # print(response)
+    # response = request
     return response
 
 
 def getResponse(http_version, status, date, server, content_length, content_type, connection, body=None):
-    row_end = '\r\n'
+    row_end = "\r\n"
     response = http_version + ' ' + status + row_end
     response += 'Date: ' + date + row_end
     response += 'Server: ' + server + row_end
-    response += 'Content-Length: ' + content_length + row_end
+    response += 'Content-Length: ' + str(content_length) + row_end
     response += 'Content-Type: ' + content_type + row_end
     response += 'Connection: ' + connection + row_end
-    response += row_end * 2
-    if body is not None:
-        response += body
-    return response
+    response += row_end * 1
+    return response, body
 
 
 def date_time_string():
