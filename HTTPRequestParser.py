@@ -2,7 +2,6 @@ import time
 import os
 import StringIO
 import urllib
-import BaseHTTPServer
 
 types = {
     'html': 'text/html',
@@ -21,8 +20,9 @@ errors = {
     403: 'Forbidden'
 }
 
-
 error_body = "<h1>Error</h1><br>Highload.Ermakov is as sad as you :("
+
+
 def parseRequest(request, root_dir):
     parsedLine = request.split('\n', 1)[0].split(' ')
     method, url = parsedLine[0], parsedLine[1]
@@ -37,19 +37,19 @@ def parseRequest(request, root_dir):
     # content_length = len(error_body)
     # content_type = 'text/html'
     if method not in ['GET', 'HEAD']:
-        body,status,connection,content_type,content_length = setError(405)
+        body, status, connection, content_type, content_length = setError(405)
         # status = '405 Not Implemented'
         # connection = 'closed'
-        return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
-                               content_type, connection, body)
+        return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                           content_type, connection, body)
 
     path = url.split('?')[0]
     path = urllib.unquote(path).decode('utf8')
 
     if '..' in path:
-        body,status,connection,content_type,content_length = setError(404)
-        return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
-                               content_type, connection, body)
+        body, status, connection, content_type, content_length = setError(404)
+        return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                           content_type, connection, body)
     # path = path.replace('%20',' ')
     print(root_dir + path)
     filename = path.split('\\')[-1]
@@ -62,7 +62,7 @@ def parseRequest(request, root_dir):
         print(path)
         if os.path.exists(root_dir + path):
             if path[-1] == '/':
-                path+='index.html'
+                path += 'index.html'
             if os.path.isfile(root_dir + path):
                 content_length = os.stat(root_dir + path).st_size
                 try:
@@ -70,23 +70,23 @@ def parseRequest(request, root_dir):
                 except:
                     pass
             else:
-                body,status,connection,content_type,content_length = setError(403)
-        # status = '405 Not Implemented'
-        # connection = 'closed'
-                return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
-                               content_type, connection, body)
+                body, status, connection, content_type, content_length = setError(403)
+                # status = '405 Not Implemented'
+                # connection = 'closed'
+                return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                                   content_type, connection, body)
         else:
-            body,status,connection,content_type,content_length = setError(404)
-        # status = '405 Not Implemented'
-        # connection = 'closed'
-            return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+            body, status, connection, content_type, content_length = setError(404)
+            # status = '405 Not Implemented'
+            # connection = 'closed'
+            return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
                                content_type, connection, body)
     except:
-        body,status,connection,content_type,content_length = setError(404)
+        body, status, connection, content_type, content_length = setError(404)
         # status = '405 Not Implemented'
         # connection = 'closed'
-        return  getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
-                               content_type, connection, body)
+        return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                           content_type, connection, body)
 
     # print(path)
     if method == 'GET':
@@ -125,10 +125,9 @@ def date_time_string():
         hh, mm, ss)
     return s
 
+
 def setError(code):
     body = StringIO.StringIO()
     error_body = "<h1>" + str(code) + ' ' + errors[code] + "</h1><br>Highload.Ermakov is as sad as you :("
     body.write(error_body)
     return body, str(code) + ' ' + errors[code], 'closed', 'text/html', len(error_body)
-
-

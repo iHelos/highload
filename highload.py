@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import argparse
+
 from workers import *
 
 HOST = 'localhost'
 PORT = 80
 WORKERS = 1
 workers = []
+
 
 def startParameters():
     parser = argparse.ArgumentParser(description="Technopark WebServer")
@@ -17,6 +19,7 @@ def startParameters():
     cpus = args['w'] or WORKERS
     return port, cpus
 
+
 def main():
     PORT, WORKERS = startParameters()
 
@@ -26,6 +29,7 @@ def main():
     s.listen(5)
 
     startServer(s, WORKERS)
+
 
 if __name__ == '__main__':
     main()

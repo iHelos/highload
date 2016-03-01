@@ -1,20 +1,19 @@
 # coding=utf-8
-import os
 import socket
 import select
-import StringIO
 import signal
 import traceback
-import BaseHTTPServer
 
 from HTTPRequestParser import *
+
 workers = []
+
 
 def handle(connection):
     request = connection.recv(1024)
     header, body = parseRequest(request, os.path.dirname(__file__))
     connection.sendall(header)
-    #connection.sendall(body)
+    # connection.sendall(body)
     if body is not None:
         body.seek(0)
         l = body.read(4096)
@@ -22,6 +21,7 @@ def handle(connection):
             connection.send(l)
             l = body.read(4096)
         body.close()
+
 
 class Worker:
     def __init__(self, pid, pipe):
@@ -61,18 +61,19 @@ def startServerUnsafety(listen_sock, count_workers):
     to_read = [listen_sock.fileno()] + [c.pipe.fileno() for c in workers]
     while True:
         readables, writables, exceptions = select.select(to_read, [], [])
-        if(listen_sock.fileno() in readables):
+        if (listen_sock.fileno() in readables):
             for worker in workers:
                 if not worker.working:
                     worker.pipe.send(b'A')
                     worker.working = True
                     break
         for worker in workers:
-             if worker.pipe.fileno() in readables:
-                 command = worker.pipe.recv(1)
-                 if command != b'F':
-                     raise Exception("exc")
-                 worker.working = False
+            if worker.pipe.fileno() in readables:
+                command = worker.pipe.recv(1)
+                if command != b'F':
+                    raise Exception("exc")
+                worker.working = False
+
 
 def startServer(listen_sock, count_workers):
     try:
