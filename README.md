@@ -1,5 +1,5 @@
 # highload
-`python highload.py`
+`python httpd.py`
 <br>
 
 Technopark WebServer <br>
