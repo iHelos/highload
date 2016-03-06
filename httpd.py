@@ -14,7 +14,7 @@ def startParameters():
     parser = argparse.ArgumentParser(description="Technopark WebServer")
     parser.add_argument('-p', type=int, help='port to run server')
     parser.add_argument('-c', type=int, help='number of workers')
-    parser.add_argument('-r', type=int, help='ROOTDIR')
+    parser.add_argument('-r', type=str, help='ROOTDIR')
 
     args = vars(parser.parse_args())
     port = args['p'] or PORT
