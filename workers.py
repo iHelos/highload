@@ -45,7 +45,7 @@ def createWorker(request_socket, dir):
                 print('starting working:')
                 handle(connection, dir)
                 connection.close()
-                parent_pipe.send(b'F')
+                parent_pipe.sendall(b'F')
 
     # -----------------------------> Материнский процесс
     workers.append(Worker(pid, worker_pipe))
@@ -63,7 +63,7 @@ def startServerUnsafety(listen_sock, count_workers, dir):
         if (listen_sock.fileno() in readables):
             for worker in workers:
                 if not worker.working:
-                    worker.pipe.send(b'A')
+                    worker.pipe.sendall(b'A')
                     worker.working = True
                     break
         for worker in workers:
