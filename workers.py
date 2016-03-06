@@ -69,9 +69,7 @@ def startServerUnsafety(listen_sock, count_workers, dir):
                     break
         for worker in workers:
             if worker.pipe.fileno() in readables:
-                command = worker.pipe.recv(1)
-                if command != b'F':
-                    raise Exception("exc")
+                worker.pipe.recv(1)
                 worker.working = False
 
 
