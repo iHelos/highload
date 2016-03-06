@@ -47,6 +47,8 @@ def createWorker(request_socket, dir):
                 connection.close()
                 parent_pipe.send(b'F')
             except:
+                connection.close()
+                parent_pipe.send(b'F')
                 pass
     # -----------------------------> Материнский процесс
     workers.append(Worker(pid, worker_pipe))
