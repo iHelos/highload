@@ -56,7 +56,7 @@ def parseRequest(request, root_dir):
         return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
                            content_type, connection, body)
     # path = path.replace('%20',' ')
-    print(root_dir + path)
+    #print(root_dir + path)
     filename = path.split('\\')[-1]
     try:
         type = filename.split('.')[-1]
@@ -64,7 +64,7 @@ def parseRequest(request, root_dir):
             content_type = types[type.lower()]
         except KeyError:
             content_type = 'application/octet-stream'
-        print(path)
+        #print(path)
         if os.path.exists(root_dir + path):
             if path[-1] == '/':
                 path += 'index.html'
