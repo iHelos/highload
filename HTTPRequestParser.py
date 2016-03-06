@@ -24,12 +24,17 @@ error_body = "<h1>Error</h1><br>Highload.Ermakov is as sad as you :("
 
 
 def parseRequest(request, root_dir):
-    parsedLine = request.split('\n', 1)[0].split(' ')
-    method, url = parsedLine[0], parsedLine[1]
-
     http_version = 'HTTP/1.1'
     status = '200 OK'
     connection = 'keep-alive'
+    try:
+        parsedLine = request.split('\n', 1)[0].split(' ')
+        method, url = parsedLine[0], parsedLine[1]
+    except:
+        body, status, connection, content_type, content_length = setError(404)
+        return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                           content_type, connection, body)
+
     body = None
     content_length = None
     # body = StringIO.StringIO()
