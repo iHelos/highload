@@ -38,10 +38,11 @@ def createWorker(request_socket, dir):
         worker_pipe.close()
         #print('Running worker with PID:', os.getpid())
         while True:
+            command = parent_pipe.recv(1)
             connection, (client_ip, client_port) = request_socket.accept()
             try:
                 #print("waiting")
-                command = parent_pipe.recv(1)
+
                 #print('starting working:')
                 handle(connection, dir)
                 connection.close()
