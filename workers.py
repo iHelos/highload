@@ -12,14 +12,14 @@ workers = []
 def handle(connection, dir):
     request = connection.recv(1024)
     header, body = parseRequest(request, dir)
-    connection.send(header)
-    # connection.send(body)
+    connection.sendall(header)
+    # connection.sendall(body)
     if body is not None:
         body.seek(0)
-        l = body.read(4096)
+        l = body.read(1024)
         while (l):
-            connection.send(l)
-            l = body.read(4096)
+            connection.sendall(l)
+            l = body.read(1024)
         body.close()
 
 
@@ -45,10 +45,10 @@ def createWorker(request_socket, dir):
                 #print('starting working:')
                 handle(connection, dir)
                 connection.close()
-                parent_pipe.send(b'F')
+                parent_pipe.sendall(b'F')
             except:
                 connection.close()
-                parent_pipe.send(b'F')
+                parent_pipe.sendall(b'F')
                 pass
     # -----------------------------> Материнский процесс
     workers.append(Worker(pid, worker_pipe))
@@ -67,7 +67,7 @@ def startServerUnsafety(listen_sock, count_workers, dir):
             for worker in workers:
                 if not worker.working:
                     worker.working = True
-                    worker.pipe.send(b'A')
+                    worker.pipe.sendall(b'A')
                     break
         for worker in workers:
             if worker.pipe.fileno() in readables:
