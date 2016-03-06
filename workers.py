@@ -38,7 +38,7 @@ def createWorker(request_socket, dir):
         worker_pipe.close()
         #print('Running worker with PID:', os.getpid())
         while True:
-
+            try:
                 #print("waiting")
                 command = parent_pipe.recv(1)
                 connection, (client_ip, client_port) = request_socket.accept()
@@ -46,7 +46,8 @@ def createWorker(request_socket, dir):
                 handle(connection, dir)
                 connection.close()
                 parent_pipe.send(b'F')
-
+            except:
+                pass
     # -----------------------------> Материнский процесс
     workers.append(Worker(pid, worker_pipe))
     parent_pipe.close()
