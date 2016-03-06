@@ -63,8 +63,8 @@ def startServerUnsafety(listen_sock, count_workers, dir):
         if (listen_sock.fileno() in readables):
             for worker in workers:
                 if not worker.working:
-                    worker.pipe.send(b'A')
                     worker.working = True
+                    worker.pipe.send(b'A')
                     break
         for worker in workers:
             if worker.pipe.fileno() in readables:
