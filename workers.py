@@ -31,29 +31,28 @@ class Worker:
 
 
 def createWorker(request_socket, dir):
-    worker_pipe, parent_pipe = socket.socketpair()
+    # worker_pipe, parent_pipe = socket.socketpair()
     pid = os.fork()
     # -----------------------------> Воркер
     if pid == 0:
-        worker_pipe.close()
+        # worker_pipe.close()
         #print('Running worker with PID:', os.getpid())
         while True:
-            command = parent_pipe.recv(1)
+            # command = parent_pipe.recv(1)
             connection, (client_ip, client_port) = request_socket.accept()
             try:
                 #print("waiting")
-
                 #print('starting working:')
                 handle(connection, dir)
                 connection.close()
-                parent_pipe.sendall(b'F')
+                # parent_pipe.sendall(b'F')
             except:
                 connection.close()
-                parent_pipe.sendall(b'F')
+                # parent_pipe.sendall(b'F')
                 pass
     # -----------------------------> Материнский процесс
-    workers.append(Worker(pid, worker_pipe))
-    parent_pipe.close()
+    # workers.append(Worker(pid, worker_pipe))
+    # parent_pipe.close()
     print(workers)
 
 
