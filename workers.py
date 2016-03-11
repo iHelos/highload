@@ -24,10 +24,9 @@ def handle(connection, dir):
 
 
 class Worker:
-    def __init__(self, pid, pipe):
+    def __init__(self, pid):
         self.pid = pid
         self.working = False
-        self.pipe = pipe
 
 
 def createWorker(request_socket, dir):
@@ -51,7 +50,7 @@ def createWorker(request_socket, dir):
                 # parent_pipe.sendall(b'F')
                 pass
     # -----------------------------> Материнский процесс
-    # workers.append(Worker(pid, worker_pipe))
+    workers.append(Worker(pid))
     # parent_pipe.close()
     print(workers)
 
@@ -59,20 +58,9 @@ def createWorker(request_socket, dir):
 def startServerUnsafety(listen_sock, count_workers, dir):
     for i in range(count_workers):
         createWorker(listen_sock, dir)
+    for w in workers:
+        os.waitpid(w.pid, 0)
 
-    to_read = [listen_sock.fileno()] + [c.pipe.fileno() for c in workers]
-    while True:
-        readables, writables, exceptions = select.select(to_read, [], [])
-        if (listen_sock.fileno() in readables):
-            for worker in workers:
-                if not worker.working:
-                    worker.working = True
-                    worker.pipe.sendall(b'A')
-                    break
-        for worker in workers:
-            if worker.pipe.fileno() in readables:
-                worker.pipe.recv(1)
-                worker.working = False
 
 
 def startServer(listen_sock, count_workers, dir):

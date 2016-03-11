@@ -49,9 +49,14 @@ def parseRequest(request, root_dir):
                            content_type, connection, body)
 
     path = url.split('?')[0]
-    path = urllib.unquote(path).decode('utf8')
+    try:
+        path = urllib.unquote(path).decode('utf8')
+    except:
+        body, status, connection, content_type, content_length = setError(404)
+        return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
+                           content_type, connection, body)
 
-    if '..' in path:
+    if '/../' in path:
         body, status, connection, content_type, content_length = setError(404)
         return getResponse(http_version, status, date_time_string(), "HighLoad_Ermakov", content_length,
                            content_type, connection, body)
